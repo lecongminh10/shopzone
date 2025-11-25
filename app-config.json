@@ -1,0 +1,38 @@
+{
+  "app": {
+    "title": "Sóc Đỏ Choice",
+    "textColor": "white",
+    "headerColor": "#ffffff",
+    "statusBar": "transparent",
+    "actionBarHidden": true,
+    "hideAndroidBottomNavigationBar": false,
+    "hideIOSSafeAreaBottom": true,
+    "selfControlLoading": false
+  },
+  "permission": {
+    "scope.userInfo": {
+      "reason": "Ứng dụng cần thông tin cá nhân để tạo tài khoản và cá nhân hóa trải nghiệm"
+    },
+    "scope.userPhonenumber": {
+      "reason": "Ứng dụng cần số điện thoại để xác thực tài khoản và liên hệ khi có đơn hàng"
+    }
+  },
+  "checkout": {
+    "appId": "1353006645484653939",
+    "securityMethod": "HmacSHA256",
+    "callbackUrl": "https://api.socdo.vn/mini-app/v1/checkout-sdk-notify",
+    "sandboxCallbackUrl": "https://api.socdo.vn"
+  },
+  "listCSS": [],
+  "listSyncJS": [],
+  "listAsyncJS": [],
+  "template": {
+    "name": "zaui-market",
+    "apiUrl": "https://api.socdo.vn",
+    "oaIDtoOpenChat": "2813091073440910336",
+    "logoUrl": "https://socdo.vn/uploads/avatar/socdo-choice-1755673719.jpg",
+    "shopName": "Sóc Đỏ Choice",
+    "shopAddress": "Số 6 LK 1 Foresa 2 , Xuân Phương, Nam Từ Liêm, Hà Nội",
+    "shopPhone": "0968888888"
+  }
+}
