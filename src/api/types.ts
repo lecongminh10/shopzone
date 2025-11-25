@@ -8,14 +8,28 @@ const isDevelopment =
       window.location.hostname === "127.0.0.1" ||
       window.location.hostname.includes("localhost")));
 
-// Helper function to get KEY_ID from VITE_KEY_ID (env) or Shop-Id (localStorage)
+// Helper function to get KEY_ID with priority: URL params > VITE_KEY_ID (env) > Shop-Id (localStorage) > default
 function getKeyId(): string {
-  // Ưu tiên lấy từ VITE_KEY_ID trong env
+  // Priority 1: URL params (highest priority)
+  if (typeof window !== "undefined") {
+    try {
+      // Parse URL params directly to avoid circular dependency
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlShopId = urlParams.get("shop_id");
+      if (urlShopId) {
+        return urlShopId;
+      }
+    } catch (error) {
+      // Ignore if parsing fails
+    }
+  }
+
+  // Priority 2: VITE_KEY_ID from env
   if (import.meta.env.VITE_KEY_ID) {
     return import.meta.env.VITE_KEY_ID;
   }
 
-  // Nếu không có trong env và có window (browser), lấy từ localStorage
+  // Priority 3: Shop-Id from localStorage
   if (typeof window !== "undefined") {
     const storedShopId = localStorage.getItem("Shop-Id");
     if (storedShopId) {
@@ -23,18 +37,50 @@ function getKeyId(): string {
     }
   }
 
-  // Fallback về giá trị mặc định
+  // Priority 4: Fallback to default
   return "23933";
 }
 
+// Helper function to get SHOP_USERNAME with priority: URL params > VITE_SHOP_USERNAME (env) > default
+function getShopUsername(): string {
+  // Priority 1: URL params (highest priority)
+  if (typeof window !== "undefined") {
+    try {
+      // Parse URL params directly to avoid circular dependency
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlUsername = urlParams.get("username");
+      if (urlUsername) {
+        return urlUsername;
+      }
+    } catch (error) {
+      // Ignore if parsing fails
+    }
+  }
+
+  // Priority 2: VITE_SHOP_USERNAME from env
+  if (import.meta.env.VITE_SHOP_USERNAME) {
+    return import.meta.env.VITE_SHOP_USERNAME;
+  }
+
+  // Priority 3: Fallback to default
+  return "0966279109";
+}
+
+// Note: API_CONFIG is evaluated once at module load time.
+// For dynamic values that change based on URL params, use getShopId() and getShopIdAsNumber() from token.util.ts
+// or getShopIdFromParams() and getUsernameFromParams() from launch-params.ts
 export const API_CONFIG = {
   // Trong dev mode, luôn dùng /api để đi qua Vite proxy (không bị CORS)
   // Trong production, PHẢI dùng full URL (mặc định https://api.socdo.vn nếu không có env var)
   BASE_URL: isDevelopment
     ? "/api" // Dev mode: luôn dùng proxy
     : import.meta.env.VITE_API_BASE_URL || "https://api.socdo.vn", // Production: full URL
-  KEY_ID: getKeyId(),
-  SHOP_USERNAME: import.meta.env.VITE_SHOP_USERNAME || "0966279109",
+  get KEY_ID() {
+    return getKeyId();
+  },
+  get SHOP_USERNAME() {
+    return getShopUsername();
+  },
   TIMEOUT: import.meta.env.VITE_API_TIMEOUT || 10000, // 10 seconds
 };
 

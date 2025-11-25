@@ -12,6 +12,7 @@ import {
 import { buildEndpoint, buildEndpointWithQuery } from "../utils/endpoint.util";
 import { getUserInfo, getPhoneNumber, authorize } from "zmp-sdk";
 import * as zmpApis from "zmp-sdk/apis";
+import { getShopIdAsNumber, getShopId } from "../utils/token.util";
 
 // Type declaration cho getLoginCode nếu có trong runtime
 declare module "zmp-sdk/apis" {
@@ -101,10 +102,36 @@ export class AuthService {
   }
 
   // Get Seller Token
-  static async getSellerToken(): Promise<SellerTokenResponse> {
+  static async getSellerToken(shopId?: string, username?: string): Promise<SellerTokenResponse> {
+    // Use provided shopId, or get from URL params, or fall back to API_CONFIG.KEY_ID
+    let keyId: string = shopId || "";
+    if (!keyId) {
+      // Try to get from URL params first
+      try {
+        const { getShopIdFromParams } = await import("../../utils/launch-params");
+        const urlShopId = getShopIdFromParams();
+        keyId = urlShopId || API_CONFIG.KEY_ID;
+      } catch (error) {
+        keyId = API_CONFIG.KEY_ID;
+      }
+    }
+    
+    // Use provided username, or get from URL params, or fall back to API_CONFIG.SHOP_USERNAME
+    let shopUsername: string = username || "";
+    if (!shopUsername) {
+      // Try to get from URL params first
+      try {
+        const { getUsernameFromParams } = await import("../../utils/launch-params");
+        const urlUsername = getUsernameFromParams();
+        shopUsername = urlUsername || API_CONFIG.SHOP_USERNAME;
+      } catch (error) {
+        shopUsername = API_CONFIG.SHOP_USERNAME;
+      }
+    }
+    
     const payload: SellerTokenRequest = {
-      username: API_CONFIG.SHOP_USERNAME,
-      key: API_CONFIG.KEY_ID,
+      username: shopUsername,
+      key: keyId,
     };
 
     try {
@@ -115,7 +142,7 @@ export class AuthService {
       console.log("[AUTH_SERVICE] BASE_URL:", API_CONFIG.BASE_URL);
       console.log("[AUTH_SERVICE] Payload:", {
         username: API_CONFIG.SHOP_USERNAME,
-        key: API_CONFIG.KEY_ID,
+        key: keyId,
       });
 
       // Thử fetch với các options khác nhau để handle CORS
@@ -238,9 +265,11 @@ export class AuthService {
       }
 
       // Lưu token và Shop-Id vào localStorage ngay sau khi lấy được
+      // Use the shopId that was actually used to fetch the token
+      const savedShopId = keyId;
       localStorage.setItem("sellerToken", sellerToken);
-      localStorage.setItem("Shop-Id", API_CONFIG.KEY_ID);
-      console.log(`[AUTH_SERVICE] ✅ Đã lưu sellerToken và Shop-Id: ${API_CONFIG.KEY_ID}`);
+      localStorage.setItem("Shop-Id", savedShopId);
+      console.log(`[AUTH_SERVICE] ✅ Đã lưu sellerToken và Shop-Id: ${savedShopId}`);
 
       const result: SellerTokenResponse = {
         status: responseData.status || responseData?.status || "success",
@@ -455,7 +484,7 @@ export class AuthService {
   // Complete Zalo authentication flow via login code -> server
   // Fallback: Nếu không có getLoginCode, dùng getUserInfo + gửi lên backend
   static async authenticateWithZalo(
-    shopId: number = parseInt(API_CONFIG.KEY_ID),
+    shopId: number = getShopIdAsNumber(),
     options?: {
       requestPhone?: boolean;
       requestUserInfo?: boolean;
@@ -733,7 +762,7 @@ export class AuthService {
         headers: {
           "Content-Type": "application/json",
           "Shop-ID": String(
-            Number.isFinite(shopId) ? shopId : parseInt(API_CONFIG.KEY_ID)
+            Number.isFinite(shopId) ? shopId : getShopIdAsNumber()
           ),
         },
         body: JSON.stringify(requestBody),
@@ -898,8 +927,8 @@ export class AuthService {
     localStorage.setItem("user", JSON.stringify(user));
     if (sellerToken) {
       localStorage.setItem("sellerToken", sellerToken);
-      // Lưu Shop-Id khi lưu sellerToken
-      localStorage.setItem("Shop-Id", API_CONFIG.KEY_ID);
+      // Lưu Shop-Id khi lưu sellerToken (sử dụng shop_id từ URL params nếu có)
+      localStorage.setItem("Shop-Id", getShopId());
     }
   }
 

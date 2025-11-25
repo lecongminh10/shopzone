@@ -4,7 +4,7 @@
  */
 
 import { AuthService } from '../service/auth.service';
-import { getShopIdFromParams } from '../../utils/launch-params';
+import { getShopIdFromParams, getUsernameFromParams } from '../../utils/launch-params';
 
 export interface DecodedToken {
   user_id: number;
@@ -56,6 +56,41 @@ export function getShopIdAsNumber(): number {
 }
 
 /**
+ * Get username with priority:
+ * 1. Launch params (from URL) - highest priority
+ * 2. VITE_SHOP_USERNAME (env)
+ * 3. localStorage launch-username
+ * 4. default "0966279109"
+ * @returns {string} The username
+ */
+export function getUsername(): string {
+  // Priority 1: Launch params from URL (highest priority)
+  try {
+    const launchUsername = getUsernameFromParams();
+    if (launchUsername) {
+      return launchUsername;
+    }
+  } catch (error) {
+    console.warn('[TOKEN_UTIL] Error getting username from launch params:', error);
+  }
+  
+  // Priority 2: VITE_SHOP_USERNAME from env
+  const envUsername = import.meta.env.VITE_SHOP_USERNAME;
+  if (envUsername) {
+    return envUsername;
+  }
+  
+  // Priority 3: Username from localStorage
+  const storedUsername = localStorage.getItem('launch-username');
+  if (storedUsername) {
+    return storedUsername;
+  }
+  
+  // Priority 4: Fallback to default
+  return "0966279109";
+}
+
+/**
  * Get seller token from localStorage
  * If not found, automatically fetch from API with retry logic
  * Also checks if Shop-Id matches VITE_KEY_ID, if not, fetches new token
@@ -67,6 +102,8 @@ export function getShopIdAsNumber(): number {
 export async function getSellerToken(retries: number = 3, retryDelay: number = 1000): Promise<string> {
   // Get current shop_id with priority: launch params > VITE_KEY_ID > localStorage > default
   const currentShopId = getShopId();
+  // Get current username with priority: launch params > VITE_SHOP_USERNAME > localStorage > default
+  const currentUsername = getUsername();
   
   // Check if Shop-Id exists and matches current shop_id
   const storedShopId = localStorage.getItem('Shop-Id');
@@ -96,7 +133,8 @@ export async function getSellerToken(retries: number = 3, retryDelay: number = 1
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       console.log(`[TOKEN_UTIL] Đang thử lấy seller token (lần ${attempt}/${retries})...`);
-      const tokenResponse = await AuthService.getSellerToken();
+      // Pass current shop_id and username to AuthService so it uses the correct values
+      const tokenResponse = await AuthService.getSellerToken(currentShopId, currentUsername);
       const newSellerToken = tokenResponse.data.seller_token;
       
       if (!newSellerToken) {

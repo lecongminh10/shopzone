@@ -12,6 +12,7 @@ import { DefaultUserAvatar } from "./vectors";
 import SearchDropdown from "./SearchDropdown";
 import NotificationModal from "./notification";
 import { AuthService } from "@/api";
+import logoImg from "@/img/logo-1753775228.png";
 
 export default function Header() {
   const products = useAtomValue(productsState);
@@ -186,8 +187,8 @@ export default function Header() {
               {/* Left: Logo + Shop name */}
               <div className="flex items-center flex-1 min-w-0">
                 <img
-                  src={getConfig((c) => c.template.logoUrl)}
-                  className="flex-none w-8 h-8 rounded-full"
+                  src={logoImg}
+                  className="flex-none  rounded-full"
                   alt="Logo"
                 />
                 <TransitionLink to="/" className="ml-2">

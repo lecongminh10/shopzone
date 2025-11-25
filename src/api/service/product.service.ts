@@ -1,5 +1,5 @@
 import { API_CONFIG } from "../types";
-import { getSellerToken } from "../utils/token.util";
+import { getSellerToken, getShopIdAsNumber } from "../utils/token.util";
 import { AuthService } from "./auth.service";
 import { buildEndpointWithQuery } from "../utils/endpoint.util";
 
@@ -165,7 +165,7 @@ export class ProductService {
     active?: number;
   }): Promise<ProductListResponse> {
     const {
-      shop_id = parseInt(API_CONFIG.KEY_ID),
+      shop_id,
       status = 1,
       active = 0,
       category_shop = "",
@@ -175,8 +175,8 @@ export class ProductService {
       search = "",
     } = options || {};
 
-    // Use shop_id from config or parameter
-    const decodedShopId = shop_id || parseInt(API_CONFIG.KEY_ID);
+    // Use shop_id from parameter, or get from URL params (priority: URL > env > localStorage > default)
+    const decodedShopId = shop_id || getShopIdAsNumber();
 
     const params = new URLSearchParams({
       shop_id: decodedShopId.toString(),
@@ -323,8 +323,8 @@ export class ProductService {
       throw new Error("Product ID is required");
     }
 
-    // Use shop_id from config or parameter
-    const decodedShopId = shop_id || parseInt(API_CONFIG.KEY_ID);
+    // Use shop_id from parameter, or get from URL params (priority: URL > env > localStorage > default)
+    const decodedShopId = shop_id || getShopIdAsNumber();
 
     const params = new URLSearchParams({
       product_id: product_id.toString(),
@@ -426,8 +426,8 @@ export class ProductService {
       throw new Error("Product ID is required");
     }
 
-    // Use shop_id from config or parameter
-    const decodedShopId = shop_id || parseInt(API_CONFIG.KEY_ID);
+    // Use shop_id from parameter, or get from URL params (priority: URL > env > localStorage > default)
+    const decodedShopId = shop_id || getShopIdAsNumber();
 
     const params = new URLSearchParams({
       product_id: product_id.toString(),

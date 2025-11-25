@@ -4,6 +4,7 @@ import { loadable } from "jotai/utils";
 import OrderSummary from "./order-summary";
 import { OrderSummarySkeleton } from "@/components/skeleton";
 import iconShop from "@/img/icon_shop.png";
+import anh1Icon from "@/img/anh1.png";
 import { productsState } from "@/state";
 import ProductItem from "@/components/product-item";
 interface OrderListProps {
@@ -67,6 +68,20 @@ function OrderList({
 
   return (
     <div className="space-y-2">
+      {/* Thông báo demo với icon */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <div className="flex items-center gap-3">
+          <img
+            src={anh1Icon}
+            alt="Thông báo"
+            className="w-12 h-12 object-contain flex-shrink-0"
+          />
+          <p className="text-sm text-blue-800 font-medium flex-1">
+            Cập nhật các thông tin để triển khai mini app ngay
+          </p>
+        </div>
+      </div>
+
       {orderList.state !== "hasData" ? (
         <>
           <OrderSummarySkeleton />

@@ -56,9 +56,16 @@ export function ShopProvider({ children }: ShopProviderProps) {
       console.log('[SHOP_CONTEXT] Shop info updated:', {
         shop_id: shopId,
         account: account,
+        allParams: allParams,
       });
     } catch (error) {
       console.error('[SHOP_CONTEXT] Error refreshing shop info:', error);
+      // Set default values to prevent blocking render
+      setShopInfo({
+        shop_id: null,
+        account: null,
+        launchParams: {},
+      });
     } finally {
       setIsLoading(false);
     }
@@ -75,9 +82,16 @@ export function ShopProvider({ children }: ShopProviderProps) {
     refreshShopInfo,
   };
 
+  // Always render children, even when loading
+  // This prevents blank screen issues
   return (
     <ShopContext.Provider value={contextValue}>
-      {children}
+      {isLoading ? (
+        // Show minimal loading state if needed, but still render children
+        children
+      ) : (
+        children
+      )}
     </ShopContext.Provider>
   );
 }

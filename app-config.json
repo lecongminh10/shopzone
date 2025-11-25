@@ -18,7 +18,7 @@
     }
   },
   "checkout": {
-    "appId": "1353006645484653939",
+    "appId": "1345502861136106",
     "securityMethod": "HmacSHA256",
     "callbackUrl": "https://api.socdo.vn/mini-app/v1/checkout-sdk-notify",
     "sandboxCallbackUrl": "https://api.socdo.vn"

@@ -293,6 +293,15 @@ export default function CheckoutPage() {
   };
 
   const handleCheckout = async () => {
+    // Demo mode: Chỉ hiển thị thông báo, không thực hiện checkout
+    toast("Đây là giao diện mẫu. Chức năng mua hàng chưa được kích hoạt.", {
+      icon: "ℹ️",
+      duration: 5000,
+    });
+    return;
+
+    // Code cũ đã được comment để disable chức năng mua hàng
+    /*
     // Validate dữ liệu
     if (selectedItems.length === 0) {
       toast.error("Vui lòng chọn sản phẩm để thanh toán");
@@ -604,6 +613,7 @@ export default function CheckoutPage() {
     } finally {
       setLoading(false);
     }
+    */
   };
 
   // Hiển thị loading nếu đang kiểm tra auth hoặc chưa đăng nhập

@@ -1,5 +1,5 @@
 import { API_CONFIG } from '../types';
-import { getShopIdFromToken, getSellerHeaders } from '../utils/token.util';
+import { getShopIdFromToken, getSellerHeaders, getShopIdAsNumber } from '../utils/token.util';
 import { buildEndpointWithQuery } from '../utils/endpoint.util';
 
 // Banner types
@@ -52,15 +52,16 @@ export class BannerService {
     limit?: number;
   }): Promise<BannerListResponse> {
     const {
-      shop_id = parseInt(API_CONFIG.KEY_ID),
+      shop_id,
       position = 'all',
       target = 'all',
       page = 1,
       limit = 100,
     } = options || {};
 
-    // Get shop_id from token
-    const decodedShopId = shop_id || await getShopIdFromToken();
+    // Use shop_id from parameter, or get from URL params (priority: URL > env > localStorage > default)
+    // Fallback to token if still not available
+    const decodedShopId = shop_id || getShopIdAsNumber() || await getShopIdFromToken();
 
     const params = new URLSearchParams({
       shop_id: decodedShopId.toString(),
